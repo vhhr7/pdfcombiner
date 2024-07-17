@@ -62,6 +62,44 @@ def convert_pdf_to_bw(file_path):
 
     return bw_save_path
 
+def display_footer():
+    footer = """
+    <style>
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: white;
+        color: black;
+        text-align: center;
+        padding: 10px;
+        border-top: 1px solid #eaeaea;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .footer .logo {
+        height: 60px; /* Increased size */
+        margin-right: 20px;
+    }
+    .footer .separator {
+        border-left: 2px solid #eaeaea;
+        height: 120px;
+        margin-right: 20px;
+    }
+    </style>
+    <div class="footer">
+        <img class="logo" src="http://vicherrera.net/wp-content/uploads/2023/05/VicHerrera_Logo.svg" alt="Vic Herrera Logo">
+        <div class="separator"></div>
+        <div>
+            <p>Developed by Vic Herrera | <a href="https://vicherrera.net" target="_blank">Vic Herrera</a> | <a href="https://datawava.com" target="_blank">datawava</a></p>
+            <p>© Version 1.2  - July, 2024</p>
+        </div>
+    </div>
+    """
+    st.markdown(footer, unsafe_allow_html=True)
+
 def main():
     st.title("PDF Combiner")
 
@@ -84,8 +122,8 @@ def main():
         if uploaded_files:
             merge_pdfs(file_paths, convert_bw=convert_to_bw)
 
-    # Footer
-    st.markdown("<div style='position: fixed; bottom: 0; width: 100%; text-align: center;'>by Vic Herrera</div>", unsafe_allow_html=True)
+    # Display footer
+    display_footer()
 
 if __name__ == "__main__":
     main()
