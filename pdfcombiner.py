@@ -4,15 +4,14 @@ import fitz  # PyMuPDF
 from PIL import Image
 import tempfile
 import io
+import os
 
 def merge_pdfs(file_paths, convert_bw=False):
     if not file_paths:
         st.warning("Please select at least one PDF file.")
         return
 
-    save_path = st.text_input("Save Merged PDF As:", "merged.pdf")
-    if not save_path:
-        return
+    save_path = os.path.join(tempfile.gettempdir(), "merged.pdf")
 
     merger = PdfMerger()
     for pdf in file_paths:
@@ -24,7 +23,13 @@ def merge_pdfs(file_paths, convert_bw=False):
     if convert_bw:
         convert_pdf_to_bw(save_path)
 
+    with open(save_path, "rb") as f_out:
+        st.download_button(label="Download Merged PDF", data=f_out, file_name="merged.pdf", mime="application/pdf")
+
     st.success("PDF files merged successfully.")
+
+    # Delete the temporary file after download
+    os.remove(save_path)
 
 def convert_pdf_to_bw(file_path):
     # Open the PDF file
@@ -49,8 +54,13 @@ def convert_pdf_to_bw(file_path):
         img_page = PdfReader(io.BytesIO(img_pdf_bytes)).pages[0]
         writer.add_page(img_page)
 
+        # Clean up temporary image file
+        os.remove(temp_img_file_path)
+
     with open(bw_save_path, "wb") as output_pdf:
         writer.write(output_pdf)
+
+    return bw_save_path
 
 def main():
     st.title("PDF Combiner")
@@ -58,15 +68,21 @@ def main():
     # File uploader
     uploaded_files = st.file_uploader("Select PDF Files", type=["pdf"], accept_multiple_files=True)
     if uploaded_files:
-        file_paths = [f.name for f in uploaded_files]
-        st.write("Selected files:", file_paths)
+        file_paths = []
+        for uploaded_file in uploaded_files:
+            with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+                tmp_file.write(uploaded_file.read())
+                file_paths.append(tmp_file.name)
+
+        st.write("Selected files:", [os.path.basename(path) for path in file_paths])
 
     # Checkbox for converting to black and white
     convert_to_bw = st.checkbox("Convert to Black and White")
 
     # Button to merge PDF files
     if st.button("Merge PDF Files"):
-        merge_pdfs(uploaded_files, convert_bw=convert_to_bw)
+        if uploaded_files:
+            merge_pdfs(file_paths, convert_bw=convert_to_bw)
 
     # Footer
     st.markdown("<div style='position: fixed; bottom: 0; width: 100%; text-align: center;'>by Vic Herrera</div>", unsafe_allow_html=True)
