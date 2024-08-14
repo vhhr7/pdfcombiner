@@ -21,10 +21,10 @@ def merge_pdfs(file_paths, convert_bw=False):
         merger.write(f_out)
 
     if convert_bw:
-        convert_pdf_to_bw(save_path)
+        save_path = convert_pdf_to_bw(save_path)  # Actualiza la ruta del archivo al archivo en blanco y negro
 
     with open(save_path, "rb") as f_out:
-        st.download_button(label="Download Merged PDF", data=f_out, file_name="merged.pdf", mime="application/pdf")
+        st.download_button(label="Download Merged PDF", data=f_out, file_name=os.path.basename(save_path), mime="application/pdf")
 
     st.success("PDF files merged successfully.")
 
